@@ -1,4 +1,4 @@
-function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, trf_start, trf_len, stim_indic, delta)
+function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, stim_indic, delta)
 %PPF_STRF Summary of this function goes here
 %   Detailed explanation goes here
 
