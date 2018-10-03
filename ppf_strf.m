@@ -1,16 +1,21 @@
-function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, stim_indic, delta)
+function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, stim_indic, reset_times, delta)
 %PPF_STRF Summary of this function goes here
 %   Detailed explanation goes here
+
 
 n_neurons = size(spikes, 1);
 state_size = size(srf, 1) - 1;
 x0_hat = 0*ones(1, state_size);   % Initial state estimate
 W0 = .0005*eye(state_size);
 W_prev = W0;                    % Initial state estimate covariance
-x_hat = x0_hat.';               % Matrix of all estimated states over time
-W_hat = zeros([state_size, state_size, size(spikes, 2)]);
+%x_hat = x0_hat.';               % Matrix of all estimated states over time
+x_hat = [];
+x_prev = x0_hat.';
+%W_hat = zeros([state_size, state_size, size(spikes, 2)]);
+W_hat = nan;
 
 lambda_est = zeros(n_neurons, size(spikes, 2));
+stim_times = find(stim_indic);
 
 
 Rc = zeros(n_neurons, size(spikes, 2));
@@ -25,12 +30,19 @@ for spike_idx = 1:size(spikes,2)
     fprintf('spike %d of %d\n', spike_idx, size(spikes, 2))
        
     % reset state if necessary
+        % reset state if necessary
+    if ismember(spike_idx, reset_times)
+       fprintf('[PPF] reset state\n')
+       x_prev = x0_hat';
+       %W_prev = W0;
+    %else
+    %   x_prev =  x_hat(:,spike_idx);
+    end
 
-    x_prev =  x_hat(:,spike_idx);
-    
-    
+ 
     x_predicted = A*x_prev;         % Random walk prior   
     W_predicted = A*W_prev*A.' + Q;
+    %W_predicted = A*W_prev*A.' + Q.*diag(Rc); % j a n k
    
     W_update = zeros(state_size);
 
@@ -43,7 +55,7 @@ for spike_idx = 1:size(spikes,2)
     W_updated_inv = inv(W_predicted) + W_update;
     W_updated = inv(W_updated_inv);
     
-    W_hat(:,:,spike_idx) = W_updated;
+    %W_hat(:,:,spike_idx) = W_updated;
         
     x_update = zeros(state_size,1);
     
@@ -57,8 +69,12 @@ for spike_idx = 1:size(spikes,2)
     x_update = W_updated_inv\x_update;   
     x_updated = x_predicted + x_update;
    
-    x_hat = [x_hat x_updated];
+    if any(spike_idx == (stim_times+500))
+        x_hat = [x_hat x_updated];
+    end
+    
     W_prev = W_updated;
+    x_prev = x_updated;
        
 end
 
