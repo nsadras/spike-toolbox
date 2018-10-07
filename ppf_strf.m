@@ -26,17 +26,12 @@ for neuron_idx = 1:n_neurons
     Rc(neuron_idx, :) = R;
 end
 
-for spike_idx = 1:size(spikes,2)
-    fprintf('spike %d of %d\n', spike_idx, size(spikes, 2))
-       
+for spike_idx = 1:size(spikes,2)       
     % reset state if necessary
         % reset state if necessary
     if ismember(spike_idx, reset_times)
-       fprintf('[PPF] reset state\n')
+       fprintf('[PPF]: reset state\n')
        x_prev = x0_hat';
-       %W_prev = W0;
-    %else
-    %   x_prev =  x_hat(:,spike_idx);
     end
 
  
