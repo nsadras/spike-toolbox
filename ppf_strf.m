@@ -1,4 +1,4 @@
-function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, stim_indic, reset_times, delta)
+function [x_hat, W_hat] = ppf_strf(spikes, srf, A, Q, trf, trf_basis_fns, trf_start, stim_indic, reset_times, delta)
 %PPF_STRF Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -23,6 +23,10 @@ for neuron_idx = 1:n_neurons
     cur_trf = trf(neuron_idx, :); % 1 x n_weights
     r = cur_trf*trf_basis_fns;
     R = conv(stim_indic, r, 'same');
+    
+    R = conv(stim_indic, r, 'full');
+    R = R(1:size(spikes,2));
+    R = circshift(R, floor(trf_start/delta));
     Rc(neuron_idx, :) = R;
 end
 
